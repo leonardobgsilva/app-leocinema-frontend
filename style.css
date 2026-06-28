@@ -18,7 +18,7 @@ body {
 .container {
   width: 600px;
   padding: 20px;
-  background: #a50020; /* Vermelho */
+  background: THEME_PRIMARY;
   border-radius: 10px;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
   text-align: center;
@@ -58,20 +58,20 @@ input[type="text"]::placeholder, input[type="date"]::placeholder, input[type="ti
 }
 
 input[type="submit"] {
-  background: #D10024; /* Vermelho Barcelona */
-  color: #fff; /* Texto branco */
+  background: THEME_SECONDARY;
+  color: #fff;
   cursor: pointer;
 }
 
 input[type="submit"]:hover {
-  background: #a70019; /* Cor mais escura no hover */
+  background: THEME_HOVER;
 }
 
 .confirmation {
   margin-top: 20px;
   padding: 10px;
-  background: #a50020; /* Vermelho */
-  color: #fff; /* Texto branco */
+  background: THEME_PRIMARY;
+  color: #fff;
   border-radius: 4px;
   overflow-x: auto;
 }
@@ -103,13 +103,13 @@ th, td {
 }
 
 th {
-  background-color: #D10024; /* Vermelho Barcelona */
+  background-color: THEME_SECONDARY;
 }
 
 tr:nth-child(even) {
-  background-color: #a50020; /* Vermelho escuro para linhas pares */
+  background-color: THEME_PRIMARY;
 }
 
 tr:hover {
-  background-color: #a70019;
+  background-color: THEME_HOVER;
 }
