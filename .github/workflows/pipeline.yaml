@@ -4,35 +4,52 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - tag: red
+            theme: red
+          - tag: green
+            theme: green
+          - tag: blue
+            theme: blue
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Build Docker Image
-        run: |
-          docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password ${{ secrets.DOCKERHUB_PASSWORD }}
-          docker build -t leobgs/leocinema-frontend:argocd .
-          docker push leobgs/leocinema-frontend:argocd
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Login Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: ArgoCD Repository Clone
-        run: |
-          git clone https://github.com/leonardobgsilva/app-leocinema-kubernetes.git
+      - name: Build and Push (${{ matrix.tag }})
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          build-args: APP_THEME=${{ matrix.theme }}
+          tags: leobgs/leocinema-frontend:${{ matrix.tag }}
 
-      - name: Update values.yaml file
-        run: |
-          sed -i 's/leocinema-frontend:.*/leocinema-frontend:argocd/' app-leocinema-kubernetes/helm/leocinema/values.yaml
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
 
-      - name: Commit and Push Changes to the ArgoCD Repository
+    steps:
+      - name: Clone ArgoCD Repository
+        run: git clone https://github.com/leonardobgsilva/app-leocinema-kubernetes.git
+
+      - name: Update values.yaml
+        run: sed -i 's/leocinema-frontend:.*/leocinema-frontend:red/' app-leocinema-kubernetes/helm/leocinema/values.yaml
+
+      - name: Commit and Push
         run: |
           cd app-leocinema-kubernetes
           git config --local user.email "ghactions@frontend.com"
           git config --local user.name "Frontend GitHub Actions"
           git add helm/leocinema/values.yaml
-          git commit -m "Atualização automática da tag da imagem Docker Frontend"
+          git commit -m "ci: atualização automática da imagem frontend"
           git push https://${{ secrets.GH_TOKEN }}@github.com/leonardobgsilva/app-leocinema-kubernetes.git
